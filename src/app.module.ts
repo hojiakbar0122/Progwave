@@ -1,36 +1,43 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { SequelizeModule } from '@nestjs/sequelize';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
-import { ProfileModule } from './profile/profile.module';
-import { NotificationModule } from './notification/notification.module';
-import { ChatModule } from './chat/chat.module';
-import { PostModule } from './post/post.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './modules/auth/auth.module';
+import { PositionModule } from './modules/position/position.module';
+import { ProfileModule } from './modules/profile/profile.module';
+import { NotificationModule } from './modules/notification/notification.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { PostModule } from './modules/post/post.module';
+import { UserModule } from './modules/users/users.module';
+import configuration from '../config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({envFilePath:".env", isGlobal:true}),
-    SequelizeModule.forRoot({
-      dialect:"postgres",
-      host:process.env.PG_HOST,
-      port:Number(process.env.PG_PORT),
-      username:process.env.PG_USER,
-      password:process.env.PG_PASSWORD,
-      database:process.env.PG_DATABASE,
-      models:[],
-      autoLoadModels:true,
-      sync:{force:false},
-      logging:false
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+      load: [configuration],
+      cache: true,
     }),
-    UsersModule,
+
+    TypeOrmModule.forRoot({
+      type: process.env.DB_TYPE as 'postgres',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      autoLoadEntities: true,
+      synchronize: true,
+      logging: false,
+    }),
+
     AuthModule,
-    ProfileModule,
+    UserModule,
+    PositionModule,
     NotificationModule,
+    ProfileModule,
     ChatModule,
-    PostModule
+    PostModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}
