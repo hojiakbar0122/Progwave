@@ -10,7 +10,7 @@ class JwtPayloadDto {
   })
   @IsNotEmpty()
   @IsString()
-  sub: string;
+  sub: number;
 
   @ApiProperty({
     description: `User login`,

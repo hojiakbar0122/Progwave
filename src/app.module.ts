@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { PositionModule } from './modules/position/position.module';
@@ -8,6 +8,9 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { PostModule } from './modules/post/post.module';
 import { UserModule } from './modules/users/users.module';
+import { FriendsModule } from './modules/friends/friends.module';
+import { FriendRequestsModule } from './modules/friend-requests/friend-requests.module';
+import { StoryModule } from './modules/story/story.module';
 import configuration from '../config';
 
 @Module({
@@ -19,16 +22,20 @@ import configuration from '../config';
       cache: true,
     }),
 
-    TypeOrmModule.forRoot({
-      type: process.env.DB_TYPE as 'postgres',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      autoLoadEntities: true,
-      synchronize: true,
-      logging: false,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',  // yoki config.get<string>('DB_TYPE') agar env’dan o‘qimoqchi bo‘lsangiz
+        host: config.get<string>('DB_HOST'),
+        port: Number(config.get<number>('DB_PORT')),
+        username: config.get<string>('DB_USERNAME'),
+        password: config.get<string>('DB_PASSWORD'),
+        database: config.get<string>('DB_NAME'),
+        autoLoadEntities: true,
+        synchronize: true,
+        logging: false,
+      }),
     }),
 
     AuthModule,
@@ -38,6 +45,9 @@ import configuration from '../config';
     ProfileModule,
     ChatModule,
     PostModule,
+    FriendsModule,
+    FriendRequestsModule,
+    StoryModule,
   ],
 })
 export class AppModule {}

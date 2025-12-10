@@ -1,26 +1,63 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Post } from "./entities/post.entity";
+import { CreatePostDto } from "./dto/create-post.dto";
+import { UpdatePostDto } from "./dto/update-post.dto";
 
 @Injectable()
-export class PostService {
-  create(createPostDto: CreatePostDto) {
-    return 'This action adds a new post';
+export class PostsService {
+  constructor(
+    @InjectRepository(Post)
+    private readonly postRepo: Repository<Post>,
+  ) {}
+
+  async create(userId: number, dto: CreatePostDto) {
+    const post = this.postRepo.create({
+      userId,
+      content: dto.content,
+      imageUrl: dto.imageUrl || null,
+    });
+
+    return await this.postRepo.save(post);
   }
 
-  findAll() {
-    return `This action returns all post`;
+  async findAll() {
+    return this.postRepo.find({
+      relations: ["user"],
+      order: { createdAt: "DESC" },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  async findOne(id: number) {
+    const post = await this.postRepo.findOne({
+      where: { id },
+      relations: ["user"],
+    });
+
+    if (!post) throw new NotFoundException("Post not found");
+    return post;
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async update(id: number, userId: number, dto: UpdatePostDto) {
+    const post = await this.postRepo.findOneBy({ id });
+    if (!post) throw new NotFoundException("Post not found");
+
+    if (post.userId !== userId)
+      throw new NotFoundException("You cannot edit this post");
+
+    Object.assign(post, dto);
+    return await this.postRepo.save(post);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async remove(id: number, userId: number) {
+    const post = await this.postRepo.findOneBy({ id });
+    if (!post) throw new NotFoundException("Post not found");
+
+    if (post.userId !== userId)
+      throw new NotFoundException("You cannot delete this post");
+
+    await this.postRepo.remove(post);
+    return { message: "Post deleted" };
   }
 }

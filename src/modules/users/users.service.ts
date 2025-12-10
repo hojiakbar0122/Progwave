@@ -62,7 +62,7 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  async getOne(id: string, from?: Date, to?: Date, collection?: String) {
+  async getOne(id: number, from?: Date, to?: Date, collection?: String) {
     const data = await this.userRepository.findOne({
       where: { id },
       relations: {
@@ -82,7 +82,7 @@ export class UserService {
       relations: ['position'],
     });
   }
-  async findOne(id: string): Promise<User> {
+  async findOne(id: number): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['position'],
@@ -95,7 +95,7 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, dto: UpdateUserDto): Promise<User> {
+  async update(id: number, dto: UpdateUserDto): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['position'],
@@ -128,7 +128,7 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const user = await this.findOne(id);
     await this.userRepository.remove(user);
   }

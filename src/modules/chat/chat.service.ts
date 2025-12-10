@@ -1,26 +1,47 @@
-import { Injectable } from '@nestjs/common';
-import { CreateChatDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Chat } from "./entities/chat.entity";
+import { CreateChatDto } from "./dto/create-chat.dto";
 
 @Injectable()
-export class ChatService {
-  create(createChatDto: CreateChatDto) {
-    return 'This action adds a new chat';
+export class ChatsService {
+  constructor(
+    @InjectRepository(Chat)
+    private readonly chatRepo: Repository<Chat>,
+  ) {}
+
+  async create(fromUserId: number, dto: CreateChatDto) {
+    if (fromUserId === dto.toUserId)
+      throw new Error("You cannot chat with yourself.");
+
+    const chat = this.chatRepo.create({
+      fromUserId,
+      toUserId: dto.toUserId,
+      text: dto.text,
+    });
+
+    return await this.chatRepo.save(chat);
   }
 
-  findAll() {
-    return `This action returns all chat`;
+  async getConversation(user1: number, user2: number) {
+    return await this.chatRepo.find({
+      where: [
+        { fromUserId: user1, toUserId: user2 },
+        { fromUserId: user2, toUserId: user1 },
+      ],
+      order: { createdAt: "ASC" },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} chat`;
-  }
+  async markAsRead(chatId: number, userId: number) {
+    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
+    if (!chat) throw new NotFoundException("Chat message not found");
 
-  update(id: number, updateChatDto: UpdateChatDto) {
-    return `This action updates a #${id} chat`;
-  }
+    if (chat.toUserId !== userId)
+      throw new Error("You can read only your incoming messages");
 
-  remove(id: number) {
-    return `This action removes a #${id} chat`;
+    chat.read = true;
+    return await this.chatRepo.save(chat);
   }
 }

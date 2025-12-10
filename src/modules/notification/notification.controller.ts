@@ -1,34 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { NotificationService } from './notification.service';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { Controller, Post, Get, Patch, Delete, Param, Body, Query, ParseIntPipe } from "@nestjs/common";
+import { NotificationService } from "./notification.service";
+import { CreateNotificationDto, UpdateNotificationDto, GetNotificationsDto } from "./dto/create-notification.dto";
 
-@Controller('notification')
+@Controller("notifications")
 export class NotificationController {
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(private readonly service: NotificationService) {}
 
   @Post()
-  create(@Body() createNotificationDto: CreateNotificationDto) {
-    return this.notificationService.create(createNotificationDto);
+  create(@Body() dto: CreateNotificationDto) {
+    return this.service.create(dto);
   }
 
   @Get()
-  findAll() {
-    return this.notificationService.findAll();
+  findAll(@Query() query: GetNotificationsDto) {
+    return this.service.findAll(query.userId, query.read);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.notificationService.findOne(+id);
+  @Get(":id")
+  findOne(@Param("id", ParseIntPipe) id: number) {
+    return this.service.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNotificationDto: UpdateNotificationDto) {
-    return this.notificationService.update(+id, updateNotificationDto);
+  @Patch(":id")
+  update(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateNotificationDto) {
+    return this.service.update(id, dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.notificationService.remove(+id);
+  @Delete(":id")
+  remove(@Param("id", ParseIntPipe) id: number) {
+    return this.service.remove(id);
   }
 }

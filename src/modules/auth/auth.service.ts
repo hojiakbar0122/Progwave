@@ -10,6 +10,7 @@ import { UserService } from '../users/users.service';
 import { ensureEnv } from 'src/shared/helpers/ensureEnv';
 import { CreateUserDto } from '../users/dto';
 import { User } from '../users/entities/user.entity';
+import { where } from 'sequelize';
 @Injectable()
 export class AuthService {
   private redis: Redis;
@@ -89,7 +90,7 @@ export class AuthService {
     return { message: 'Email tasdiqlandi' };
   }
 
-  async validateUserById(userId: string) {
+  async validateUserById(userId: number) {
     const user = await this.userService.getOne(userId).catch(() => {
       throw new BadRequestException('Valid token with non-existent user.');
     });
@@ -101,7 +102,7 @@ export class AuthService {
     return isSame;
   }
 
-  getJWT(type: 'access' | 'refresh', sub: string) {
+  getJWT(type: 'access' | 'refresh', sub: number) {
     const payload = { sub };
 
     if (type === 'access') {
@@ -115,7 +116,7 @@ export class AuthService {
     });
   }
 
-  async isValidUser(id: string): Promise<boolean> {
+  async isValidUser(id: number): Promise<boolean> {
     const user = await this.userService.getOne(id);
     return !!user?.isActive;
   }

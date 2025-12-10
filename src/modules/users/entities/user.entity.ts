@@ -5,15 +5,20 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Position } from 'src/modules/position/position.entity';
+import { FriendRequest } from 'src/modules/friend-requests/entities/friend-request.entity';
+import { Friend } from 'src/modules/friends/entities/friend.entity';
+import { Profile } from 'src/modules/profile/entities/profile.entity';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ type: 'varchar', nullable: true })
   firstName: string;
@@ -60,4 +65,22 @@ export class User {
   @ManyToOne(() => Position, (position) => position.users)
   @JoinColumn()
   position: Position;
+
+  @OneToMany(() => FriendRequest, (req) => req.fromUser)
+  sentFriendRequests: FriendRequest[];
+
+  @OneToMany(() => FriendRequest, (req) => req.toUser)
+  receivedFriendRequests: FriendRequest[];
+
+  @OneToMany(() => Friend, (friend) => friend.user)
+  friends: Friend[];
+
+  @OneToMany(() => Friend, (friend) => friend.friend)
+  friendOf: Friend[];
+
+  @OneToOne(() => Profile, (profile) => profile.user)
+  profile: Profile;
+
+
+
 }

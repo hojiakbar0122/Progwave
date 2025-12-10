@@ -1,1 +1,10 @@
-export class CreatePostDto {}
+import { IsString, IsOptional } from "class-validator";
+
+export class CreatePostDto {
+  @IsString()
+  content: string;
+
+  @IsString()
+  @IsOptional()
+  imageUrl?: string;
+}

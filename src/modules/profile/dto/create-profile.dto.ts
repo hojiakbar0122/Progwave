@@ -1,1 +1,7 @@
-export class CreateProfileDto {}
+import { IsNotEmpty, IsNumber } from "class-validator";
+
+export class CreateProfileDto {
+  @IsNumber()
+  @IsNotEmpty()
+  userId: number;
+}
