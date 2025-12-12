@@ -2,13 +2,15 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
-} from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, DataSource } from "typeorm";
-import { FriendRequest } from "../friend-requests/entities/friend-request.entity";
-import { Friend } from "./entities/friend.entity";
-import { User } from "../users/entities/user.entity";
-import { FriendsGateway } from "./friends.gateway";
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DataSource } from 'typeorm';
+import { FriendRequest } from '../friend-requests/entities/friend-request.entity';
+import { Friend } from './entities/friend.entity';
+import { User } from '../users/entities/user.entity';
+import { FriendsGateway } from './friends.gateway';
 
 @Injectable()
 export class FriendsService {
@@ -24,109 +26,108 @@ export class FriendsService {
 
     private dataSource: DataSource,
 
-    private gateway: FriendsGateway
+    @Inject(forwardRef(() => FriendsGateway))
+    private gateway: FriendsGateway,
   ) {}
 
   // ============================================================
   // SEND FRIEND REQUEST
   // ============================================================
- async sendRequest(fromUserId: number, toUserId: number) {
-  if (fromUserId === toUserId)
-    throw new BadRequestException("You cannot add yourself.");
+  async sendRequest(fromUserId: number, toUserId: number) {
+    if (fromUserId === toUserId)
+      throw new BadRequestException('You cannot add yourself.');
 
-  const toUser = await this.userRepo.findOne({ where: { id: toUserId } });
-  if (!toUser) throw new NotFoundException("User not found");
+    const toUser = await this.userRepo.findOne({ where: { id: toUserId } });
+    if (!toUser) throw new NotFoundException('User not found');
 
-  // 1) Check if already friends
-  const alreadyFriends = await this.friendRepo.findOne({
-    where: [
-      { userId: fromUserId, friendId: toUserId },
-      { userId: toUserId, friendId: fromUserId },
-    ],
-  });
+    // 1) Check if already friends
+    const alreadyFriends = await this.friendRepo.findOne({
+      where: [
+        { userId: fromUserId, friendId: toUserId },
+        { userId: toUserId, friendId: fromUserId },
+      ],
+    });
 
-  if (alreadyFriends)
-    throw new BadRequestException("You are already friends.");
+    if (alreadyFriends)
+      throw new BadRequestException('You are already friends.');
 
-  // 2) Check existing pending request in both directions
-  const existing = await this.friendRequestRepo.findOne({
-    where: [
-      { fromUserId, toUserId },
-      { fromUserId: toUserId, toUserId: fromUserId },
-    ],
-  });
+    // 2) Check existing pending request in both directions
+    const existing = await this.friendRequestRepo.findOne({
+      where: [
+        { fromUserId, toUserId },
+        { fromUserId: toUserId, toUserId: fromUserId },
+      ],
+    });
 
-  if (existing && existing.status === "pending")
-    throw new BadRequestException("Request already pending.");
+    if (existing && existing.status === 'pending')
+      throw new BadRequestException('Request already pending.');
 
-  // 3) Create request
-  let req = this.friendRequestRepo.create({
-    fromUserId,
-    toUserId,
-    status: "pending",
-  });
+    // 3) Create request
+    let req = this.friendRequestRepo.create({
+      fromUserId,
+      toUserId,
+      status: 'pending',
+    });
 
-  req = await this.friendRequestRepo.save(req);  // <-- id hosil bo'ladi!
+    req = await this.friendRequestRepo.save(req); // <-- id hosil bo'ladi!
 
-  // 4) SOCKET EVENT
-  await this.gateway.emitFriendRequest(toUserId, {
-    requestId: req.id,
-    fromUserId,
-  });
+    // 4) SOCKET EVENT
+    await this.gateway.emitFriendRequest(toUserId, {
+      requestId: req.id,
+      fromUserId,
+    });
 
-  return req;
-}
-
+    return req;
+  }
 
   // ============================================================
   // ACCEPT REQUEST
   // ============================================================
   async acceptRequest(requestId: number, userId: number) {
-  const request = await this.friendRequestRepo.findOne({
-    where: { id: requestId },
-  });
+    const request = await this.friendRequestRepo.findOne({
+      where: { id: requestId },
+    });
 
-  if (!request) throw new NotFoundException("Request not found");
+    if (!request) throw new NotFoundException('Request not found');
 
-  if (request.toUserId !== userId)
-    throw new BadRequestException("This request is not for you");
+    if (request.toUserId !== userId)
+      throw new BadRequestException('This request is not for you');
 
-  if (request.status !== "pending")
-    throw new BadRequestException("Request already processed");
+    if (request.status !== 'pending')
+      throw new BadRequestException('Request already processed');
 
-  // Transaction: add two friend rows + update request
-  const acceptedReq = await this.dataSource.transaction(async (manager) => {
-    // 1) Update status
-    request.status = "accepted";
-    await manager.save(request);
+    // Transaction: add two friend rows + update request
+    const acceptedReq = await this.dataSource.transaction(async (manager) => {
+      // 1) Update status
+      request.status = 'accepted';
+      await manager.save(request);
 
-    // 2) Create two friend rows
-    await manager.save(
-      manager.create(Friend, {
-        userId: request.fromUserId,
-        friendId: request.toUserId,
-      })
-    );
+      // 2) Create two friend rows
+      await manager.save(
+        manager.create(Friend, {
+          userId: request.fromUserId,
+          friendId: request.toUserId,
+        }),
+      );
 
-    await manager.save(
-      manager.create(Friend, {
-        userId: request.toUserId,
-        friendId: request.fromUserId,
-      })
-    );
+      await manager.save(
+        manager.create(Friend, {
+          userId: request.toUserId,
+          friendId: request.fromUserId,
+        }),
+      );
 
-    return request;
-  });
+      return request;
+    });
 
-  // 3) SOCKET EVENT — TO‘G‘RI joyi
-  await this.gateway.emitFriendAccept(acceptedReq.fromUserId, {
-    requestId: acceptedReq.id,
-    acceptedBy: userId,
-  });
+    // 3) SOCKET EVENT — TO‘G‘RI joyi
+    await this.gateway.emitFriendAccept(acceptedReq.fromUserId, {
+      requestId: acceptedReq.id,
+      acceptedBy: userId,
+    });
 
-  return acceptedReq;
-}
-
+    return acceptedReq;
+  }
 
   // ============================================================
   // REJECT REQUEST
@@ -136,15 +137,15 @@ export class FriendsService {
       where: { id: requestId },
     });
 
-    if (!request) throw new NotFoundException("Request not found");
+    if (!request) throw new NotFoundException('Request not found');
 
     if (request.toUserId !== userId)
-      throw new BadRequestException("This request is not for you");
+      throw new BadRequestException('This request is not for you');
 
-    if (request.status !== "pending")
-      throw new BadRequestException("Request already processed");
+    if (request.status !== 'pending')
+      throw new BadRequestException('Request already processed');
 
-    request.status = "rejected";
+    request.status = 'rejected';
     return this.friendRequestRepo.save(request);
   }
 
@@ -156,15 +157,15 @@ export class FriendsService {
       where: { id: requestId },
     });
 
-    if (!request) throw new NotFoundException("Request not found");
+    if (!request) throw new NotFoundException('Request not found');
 
     if (request.fromUserId !== userId)
-      throw new BadRequestException("You cannot cancel this");
+      throw new BadRequestException('You cannot cancel this');
 
-    if (request.status !== "pending")
-      throw new BadRequestException("Request already processed");
+    if (request.status !== 'pending')
+      throw new BadRequestException('Request already processed');
 
-    request.status = "cancelled";
+    request.status = 'cancelled';
     return this.friendRequestRepo.save(request);
   }
 
@@ -174,7 +175,7 @@ export class FriendsService {
   async getFriends(userId: number) {
     return this.friendRepo.find({
       where: { userId },
-      relations: ["friend"],
+      relations: ['friend'],
     });
   }
 
@@ -183,8 +184,8 @@ export class FriendsService {
   // ============================================================
   async getPendingRequests(userId: number) {
     return this.friendRequestRepo.find({
-      where: { toUserId: userId, status: "pending" },
-      relations: ["fromUser"],
+      where: { toUserId: userId, status: 'pending' },
+      relations: ['fromUser'],
     });
   }
 }

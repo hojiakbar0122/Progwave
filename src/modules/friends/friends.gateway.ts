@@ -4,6 +4,7 @@ import {
   SubscribeMessage,
 } from "@nestjs/websockets";
 import { Server } from "socket.io";
+import { Inject, forwardRef } from "@nestjs/common";
 import { FriendsService } from "./friends.service";
 
 @WebSocketGateway({
@@ -15,7 +16,10 @@ export class FriendsGateway {
 
   private onlineUsers = new Map<number, string>(); // userId -> socketId
 
-  constructor(private readonly friendsService: FriendsService) {}
+  constructor(
+    @Inject(forwardRef(() => FriendsService))
+    private readonly friendsService: FriendsService
+  ) {}
 
   // When user connects
   handleConnection(client) {
