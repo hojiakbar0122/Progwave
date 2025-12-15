@@ -1,4 +1,12 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateNotificationDto } from './create-notification.dto';
+import { IsBoolean, IsOptional } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export class UpdateNotificationDto extends PartialType(CreateNotificationDto) {}
+export class UpdateNotificationDto {
+  @ApiPropertyOptional({
+    description: 'Notification o‘qilganligini belgilash',
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  read?: boolean;
+}

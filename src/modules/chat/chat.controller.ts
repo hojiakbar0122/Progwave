@@ -2,34 +2,72 @@ import {
   Controller,
   Post,
   Body,
-  UseGuards,
   Req,
-  Get,
   Param,
-  Patch,
   ParseIntPipe,
-} from "@nestjs/common";
-import { ChatsService } from "./chat.service";
-import { RolesGuard } from "../auth/guards/roles.guard";
-import { CreateChatDto } from "./dto/create-chat.dto";
+  Get,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
-@Controller("chats")
-@UseGuards(RolesGuard)
-export class ChatsController {
-  constructor(private readonly chatsService: ChatsService) {}
+import { ChatService } from './chat.service';
+import { CreateChatDto } from './dto/create-chat.dto';
+import { CreateMessageDto } from '../message/dto/create-message.dto';
+
+@ApiTags('Chats')
+@ApiBearerAuth()
+@Controller('chats')
+@UseGuards(AuthGuard('access_token_user'))
+export class ChatController {
+  constructor(private readonly service: ChatService) {}
 
   @Post()
-  create(@Req() req, @Body() dto: CreateChatDto) {
-    return this.chatsService.create(req.user.id, dto);
+  @ApiOperation({ summary: 'Yangi chat yaratish' })
+  @ApiResponse({ status: 201, description: 'Chat muvaffaqiyatli yaratildi' })
+  create(@Req() req: any, @Body() dto: CreateChatDto) {
+    // user chat ishtirokchisi bo‘lishi shart
+    if (!dto.participantIds.includes(req.user.id)) {
+      dto.participantIds.push(req.user.id);
+    }
+
+    dto.initialMessageSenderId = req.user.id;
+
+    return this.service.createChat(dto);
   }
 
-  @Get(":userId")
-  getConversation(@Req() req, @Param("userId", ParseIntPipe) otherUserId: number) {
-    return this.chatsService.getConversation(req.user.id, otherUserId);
+  @Post('messages')
+  @ApiOperation({ summary: 'Chatga yangi xabar yuborish' })
+  @ApiResponse({ status: 201, description: 'Xabar yuborildi' })
+  addMessage(@Req() req: any, @Body() dto: CreateMessageDto) {
+    dto.senderId = req.user.id;
+    return this.service.addMessage(dto);
   }
 
-  @Patch("read/:id")
-  markAsRead(@Req() req, @Param("id", ParseIntPipe) id: number) {
-    return this.chatsService.markAsRead(id, req.user.id);
+  @Get(':id/messages')
+  @ApiOperation({ summary: 'Chat xabarlarini olish' })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'Chat ID',
+  })
+  @ApiResponse({ status: 200, description: 'Xabarlar ro‘yxati' })
+  getMessages(@Param('id', ParseIntPipe) chatId: number) {
+    return this.service.getMessages(chatId);
+  }
+
+  @Post('messages/:id/read')
+  @ApiOperation({ summary: 'Xabarni o‘qilgan deb belgilash' })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'Message ID',
+  })
+  @ApiResponse({ status: 200, description: 'Xabar o‘qilgan deb belgilandi' })
+  markAsRead(
+    @Param('id', ParseIntPipe) messageId: number,
+    @Req() req: any,
+  ) {
+    return this.service.markAsRead(messageId, req.user.id);
   }
 }

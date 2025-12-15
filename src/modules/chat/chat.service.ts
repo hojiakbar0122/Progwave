@@ -1,47 +1,75 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
 import { Chat } from "./entities/chat.entity";
+import { Message } from "../message/entities/message.entity";
+import { User } from "../users/entities/user.entity";
 import { CreateChatDto } from "./dto/create-chat.dto";
+import { CreateMessageDto } from "../message/dto/create-message.dto";
 
 @Injectable()
-export class ChatsService {
+export class ChatService {
   constructor(
     @InjectRepository(Chat)
     private readonly chatRepo: Repository<Chat>,
+    @InjectRepository(Message)
+    private readonly messageRepo: Repository<Message>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
   ) {}
 
-  async create(fromUserId: number, dto: CreateChatDto) {
-    if (fromUserId === dto.toUserId)
-      throw new Error("You cannot chat with yourself.");
+  // Yangi chat yaratish
+  async createChat(dto: CreateChatDto) {
+    const participants = await this.userRepo.findByIds(dto.participantIds);
 
-    const chat = this.chatRepo.create({
-      fromUserId,
-      toUserId: dto.toUserId,
+    const chat = this.chatRepo.create({ participants });
+    await this.chatRepo.save(chat);
+
+    if (dto.text && dto.initialMessageSenderId) {
+      const message = this.messageRepo.create({
+        chat,
+        senderId: dto.initialMessageSenderId,
+        text: dto.text,
+      });
+      await this.messageRepo.save(message);
+    }
+
+    return chat;
+  }
+
+  // Chatga message qo‘shish
+  async addMessage(dto: CreateMessageDto) {
+    
+    const chat = await this.chatRepo.findOne({ where: { id: dto.chatId } });
+    if (!chat) throw new NotFoundException("Chat not found");
+
+    const message = this.messageRepo.create({
+      chat,
+      senderId: dto.senderId,
       text: dto.text,
     });
 
-    return await this.chatRepo.save(chat);
+    return this.messageRepo.save(message);
   }
 
-  async getConversation(user1: number, user2: number) {
-    return await this.chatRepo.find({
-      where: [
-        { fromUserId: user1, toUserId: user2 },
-        { fromUserId: user2, toUserId: user1 },
-      ],
+  // Chatdagi barcha xabarlarni olish
+  async getMessages(chatId: number) {
+    return this.messageRepo.find({
+      where: { chat: { id: chatId } },
       order: { createdAt: "ASC" },
     });
   }
 
-  async markAsRead(chatId: number, userId: number) {
-    const chat = await this.chatRepo.findOne({ where: { id: chatId } });
-    if (!chat) throw new NotFoundException("Chat message not found");
+  // Xabarni o‘qilgan sifatida belgilash
+  async markAsRead(messageId: number, userId: number) {
+    const message = await this.messageRepo.findOne({ where: { id: messageId } });
+    if (!message) throw new NotFoundException("Message not found");
 
-    if (chat.toUserId !== userId)
-      throw new Error("You can read only your incoming messages");
+    if (message.senderId === userId)
+      throw new Error("You cannot mark your own sent message as read");
 
-    chat.read = true;
-    return await this.chatRepo.save(chat);
+    message.read = true;
+    message.readAt = new Date();
+    return this.messageRepo.save(message);
   }
 }

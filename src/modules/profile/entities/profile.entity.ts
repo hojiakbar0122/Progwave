@@ -19,6 +19,9 @@ export class Profile {
   @Column({ type: "varchar", length: 150, nullable: true })
   website: string;
 
+  @Column("simple-array", { nullable: true })
+  skills: string[];
+
   @Column({ type: "varchar", length: 255, nullable: true })
   avatarUrl: string;
 

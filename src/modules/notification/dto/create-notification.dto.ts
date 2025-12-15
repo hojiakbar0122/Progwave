@@ -1,34 +1,40 @@
-import { IsNumber, IsString, IsOptional, IsBoolean } from "class-validator";
+import {
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsObject,
+  Min,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-// Yangi notification yaratish
+export enum NotificationType {
+  FRIEND_REQUEST = 'FRIEND_REQUEST',
+  MESSAGE = 'MESSAGE',
+  SYSTEM = 'SYSTEM',
+}
+
 export class CreateNotificationDto {
-  @IsNumber()
-  userId: number;
+  @ApiProperty({
+    enum: NotificationType,
+    description: 'Notification turi',
+    example: NotificationType.FRIEND_REQUEST,
+  })
+  @IsEnum(NotificationType)
+  type: NotificationType;
 
-  @IsString()
-  type: string;
-
+  @ApiPropertyOptional({
+    description: 'Qo‘shimcha ma’lumot (JSON)',
+    example: { requestId: 12 },
+  })
   @IsOptional()
-  payload?: any;
+  @IsObject()
+  payload?: Record<string, any>;
 
-  @IsOptional()
-  @IsBoolean()
-  read?: boolean;
-}
-
-// Notification update (masalan, read qilish)
-export class UpdateNotificationDto {
-  @IsOptional()
-  @IsBoolean()
-  read?: boolean;
-}
-
-// Notification list yoki filter olish
-export class GetNotificationsDto {
-  @IsOptional()
-  @IsNumber()
-  userId?: number;
-
+  @ApiPropertyOptional({
+    description: 'O‘qilgan yoki o‘qilmaganligi',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   read?: boolean;

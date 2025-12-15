@@ -1,46 +1,93 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Notification } from "./entities/notification.entity";
-import { CreateNotificationDto, UpdateNotificationDto } from "./dto/create-notification.dto";
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { Notification } from './entities/notification.entity';
+import {
+  CreateNotificationDto,
+} from './dto/create-notification.dto';
+import { GetNotificationsDto } from './dto/get-notifications.dto';
+import { UpdateNotificationDto } from './dto/update-notification.dto';
 
 @Injectable()
 export class NotificationService {
   constructor(
     @InjectRepository(Notification)
-    private readonly notificationRepo: Repository<Notification>
+    private readonly notificationRepo: Repository<Notification>,
   ) {}
 
-  async create(dto: CreateNotificationDto): Promise<Notification> {
-    const notification = this.notificationRepo.create(dto);
+  // 🔔 Notification yaratish
+  async create(
+    userId: number,
+    dto: CreateNotificationDto,
+  ): Promise<Notification> {
+    const notification = this.notificationRepo.create({
+      userId,
+      ...dto,
+    });
+
     return this.notificationRepo.save(notification);
   }
 
-  async findAll(userId?: number, read?: boolean): Promise<Notification[]> {
-    const where: any = {};
-    if (userId !== undefined) where.userId = userId;
-    if (read !== undefined) where.read = read;
+  // 📥 Foydalanuvchi notificationlari
+  async findAll(
+    userId: number,
+    query: GetNotificationsDto,
+  ): Promise<Notification[]> {
+    const where: any = { userId };
+
+    if (query.read !== undefined) {
+      where.read = query.read;
+    }
+
+    if (query.type) {
+      where.type = query.type;
+    }
 
     return this.notificationRepo.find({
       where,
-      order: { createdAt: "DESC" },
+      order: { createdAt: 'DESC' },
     });
   }
 
-  async findOne(id: number): Promise<Notification> {
-    const notification = await this.notificationRepo.findOne({ where: { id } });
-    if (!notification) throw new NotFoundException("Notification not found");
+  // 🔍 Bitta notification
+  async findOne(
+    userId: number,
+    id: number,
+  ): Promise<Notification> {
+    const notification = await this.notificationRepo.findOne({
+      where: { id, userId },
+    });
+
+    if (!notification) {
+      throw new NotFoundException('Notification not found');
+    }
+
     return notification;
   }
 
-  async update(id: number, dto: UpdateNotificationDto): Promise<Notification> {
-    const notification = await this.findOne(id);
+  // ✏️ Yangilash (read qilish)
+  async update(
+    userId: number,
+    id: number,
+    dto: UpdateNotificationDto,
+  ): Promise<Notification> {
+    const notification = await this.findOne(userId, id);
+
     Object.assign(notification, dto);
     return this.notificationRepo.save(notification);
   }
 
-  async remove(id: number): Promise<void> {
-    const notification = await this.findOne(id);
+  // 🗑 O‘chirish
+  async remove(
+    userId: number,
+    id: number,
+  ): Promise<void> {
+    const notification = await this.findOne(userId, id);
     await this.notificationRepo.remove(notification);
   }
 }

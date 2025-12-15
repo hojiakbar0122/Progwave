@@ -9,43 +9,71 @@ import {
   Req,
   UseGuards,
   ParseIntPipe,
-} from "@nestjs/common";
-import { PostsService } from "./post.service";
-import { RolesGuard } from "../auth/guards/roles.guard";
-import { CreatePostDto } from "./dto/create-post.dto";
-import { UpdatePostDto } from "./dto/update-post.dto";
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
-@Controller("posts")
+import { PostsService } from './post.service';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
+import { ACCESS_TOKEN_USER } from '../auth/passport-stratagies/access-token-user/access-token-user.strategy';
+
+@ApiTags('Posts')
+@ApiBearerAuth()
 @UseGuards(RolesGuard)
+@Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
+  @UseGuards(AuthGuard(ACCESS_TOKEN_USER))
   @Post()
-  create(@Req() req, @Body() dto: CreatePostDto) {
+  @ApiOperation({ summary: 'Yangi post yaratish' })
+  @ApiResponse({ status: 201, description: 'Post yaratildi' })
+  create(@Req() req: any, @Body() dto: CreatePostDto) {
     return this.postsService.create(req.user.id, dto);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Barcha postlarni olish' })
+  @ApiResponse({ status: 200, description: 'Postlar ro‘yxati' })
   findAll() {
     return this.postsService.findAll();
   }
 
-  @Get(":id")
-  findOne(@Param("id", ParseIntPipe) id: number) {
+  @Get(':id')
+  @ApiOperation({ summary: 'Bitta postni olish' })
+  @ApiParam({ name: 'id', type: Number, description: 'Post ID' })
+  @ApiResponse({ status: 200, description: 'Post topildi' })
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.findOne(id);
   }
 
-  @Patch(":id")
+  @UseGuards(AuthGuard(ACCESS_TOKEN_USER))
+  @Patch(':id')
+  @ApiOperation({ summary: 'Postni yangilash (faqat o‘z posti)' })
+  @ApiParam({ name: 'id', type: Number, description: 'Post ID' })
+  @ApiResponse({ status: 200, description: 'Post yangilandi' })
   update(
-    @Req() req,
-    @Param("id", ParseIntPipe) id: number,
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdatePostDto,
   ) {
     return this.postsService.update(id, req.user.id, dto);
   }
 
-  @Delete(":id")
-  remove(@Req() req, @Param("id", ParseIntPipe) id: number) {
+  @UseGuards(AuthGuard(ACCESS_TOKEN_USER))
+  @Delete(':id')
+  @ApiOperation({ summary: 'Postni o‘chirish (faqat o‘z posti)' })
+  @ApiParam({ name: 'id', type: Number, description: 'Post ID' })
+  @ApiResponse({ status: 200, description: 'Post o‘chirildi' })
+  remove(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     return this.postsService.remove(id, req.user.id);
   }
 }

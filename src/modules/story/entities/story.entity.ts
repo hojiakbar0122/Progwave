@@ -23,8 +23,12 @@ export class Story {
   @Column({ type: "text" })
   mediaUrl: string; // image yoki video
 
-  @Column({ type: "boolean", default: false })
-  isVideo: boolean;
+  @Column({
+    type: "enum",
+    enum: ["image", "video"],
+    default: "image",
+  })
+  mediaType: "image" | "video";
 
   @CreateDateColumn()
   createdAt: Date;

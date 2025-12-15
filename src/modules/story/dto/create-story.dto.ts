@@ -1,10 +1,24 @@
-import { IsString, IsBoolean, IsOptional } from "class-validator";
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export enum MediaType {
+  IMAGE = 'image',
+  VIDEO = 'video',
+}
 
 export class CreateStoryDto {
+  @ApiProperty({ description: 'Story media URL', example: 'https://example.com/photo.jpg' })
   @IsString()
+  @IsNotEmpty()
   mediaUrl: string;
 
-  @IsBoolean()
+  @ApiPropertyOptional({ description: 'Media turi', enum: MediaType })
   @IsOptional()
-  isVideo?: boolean = false;
+  @IsEnum(MediaType)
+  mediaType?: MediaType;
 }

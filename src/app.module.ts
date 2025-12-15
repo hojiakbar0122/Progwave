@@ -11,6 +11,7 @@ import { UserModule } from './modules/users/users.module';
 import { FriendsModule } from './modules/friends/friends.module';
 import { FriendRequestsModule } from './modules/friend-requests/friend-requests.module';
 import { StoryModule } from './modules/story/story.module';
+import { MessageModule } from './modules/message/message.module';
 import configuration from '../config';
 
 @Module({
@@ -48,6 +49,7 @@ import configuration from '../config';
     FriendsModule,
     FriendRequestsModule,
     StoryModule,
+    MessageModule,
   ],
 })
 export class AppModule {}

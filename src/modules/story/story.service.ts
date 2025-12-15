@@ -4,6 +4,7 @@ import { Repository, LessThan, MoreThan } from "typeorm";
 import { Story } from "./entities/story.entity";
 import { StoryView } from "./entities/story-view.entity";
 import { CreateStoryDto } from "./dto/create-story.dto";
+import { User } from "../users/entities/user.entity";
 
 @Injectable()
 export class StoryService {
@@ -11,23 +12,27 @@ export class StoryService {
     @InjectRepository(Story)
     private storyRepo: Repository<Story>,
 
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+
     @InjectRepository(StoryView)
     private viewRepo: Repository<StoryView>,
   ) {}
 
   async create(userId: number, dto: CreateStoryDto) {
-    const expires = new Date();
-    expires.setHours(expires.getHours() + 24); // 24 soat
+  const user = await this.userRepo.findOne({ where: { id: userId } });
+  if (!user) throw new NotFoundException("User not found");
 
-    const story = this.storyRepo.create({
-      userId,
-      mediaUrl: dto.mediaUrl,
-      isVideo: dto.isVideo || false,
-      expiresAt: expires,
-    });
+  const story = this.storyRepo.create({
+    userId,
+    mediaUrl: dto.mediaUrl,
+    mediaType: dto.mediaType ?? "image",
+    expiresAt: new Date(Date.now() + 86400000),
+  });
 
-    return this.storyRepo.save(story);
-  }
+  return this.storyRepo.save(story);
+}
+
 
   async getUserStories(userId: number) {
     return this.storyRepo.find({
