@@ -10,15 +10,16 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Position } from 'src/modules/position/position.entity';
+import { Position } from 'src/modules/position/entity/position.entity';
 import { FriendRequest } from 'src/modules/friend-requests/entities/friend-request.entity';
 import { Friend } from 'src/modules/friends/entities/friend.entity';
 import { Profile } from 'src/modules/profile/entities/profile.entity';
+import { Media } from 'src/modules/media/entity/media.entity';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ type: 'varchar', nullable: true })
   firstName: string;
@@ -81,6 +82,6 @@ export class User {
   @OneToOne(() => Profile, (profile) => profile.user)
   profile: Profile;
 
-
-
+  @ManyToOne(() => Media, (media) => media.users, { onDelete: 'SET NULL' })
+  avatar: Media;
 }

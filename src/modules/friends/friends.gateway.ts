@@ -2,28 +2,28 @@ import {
   WebSocketGateway,
   WebSocketServer,
   SubscribeMessage,
-} from "@nestjs/websockets";
-import { Server } from "socket.io";
-import { Inject, forwardRef } from "@nestjs/common";
-import { FriendsService } from "./friends.service";
+} from '@nestjs/websockets';
+import { Server } from 'socket.io';
+import { Inject, forwardRef } from '@nestjs/common';
+import { FriendsService } from './friends.service';
 
 @WebSocketGateway({
-  cors: { origin: "*" },
+  cors: { origin: '*' },
 })
 export class FriendsGateway {
   @WebSocketServer()
   server: Server;
 
-  private onlineUsers = new Map<number, string>(); // userId -> socketId
+  private onlineUsers = new Map<string, string>(); // userId -> socketId
 
   constructor(
     @Inject(forwardRef(() => FriendsService))
-    private readonly friendsService: FriendsService
+    private readonly friendsService: FriendsService,
   ) {}
 
   // When user connects
   handleConnection(client) {
-    const userId = Number(client.handshake.query.userId);
+    const userId = client.handshake.query.userId;
     this.onlineUsers.set(userId, client.id);
 
     this.notifyFriendsOnline(userId);
@@ -31,7 +31,7 @@ export class FriendsGateway {
 
   handleDisconnect(client) {
     const userId = [...this.onlineUsers].find(
-      ([_, sid]) => sid === client.id
+      ([_, sid]) => sid === client.id,
     )?.[0];
 
     if (userId) {
@@ -43,13 +43,13 @@ export class FriendsGateway {
   // ====================================================
   // Notify user's friends that he is online
   // ====================================================
-  private async notifyFriendsOnline(userId: number) {
+  private async notifyFriendsOnline(userId: string) {
     const friends = await this.friendsService.getFriends(userId);
 
     friends.forEach((f) => {
       const socketId = this.onlineUsers.get(f.friendId);
       if (socketId) {
-        this.server.to(socketId).emit("friend_online", { userId });
+        this.server.to(socketId).emit('friend_online', { userId });
       }
     });
   }
@@ -57,13 +57,13 @@ export class FriendsGateway {
   // ====================================================
   // Notify user's friends that he is offline
   // ====================================================
-  private async notifyFriendsOffline(userId: number) {
+  private async notifyFriendsOffline(userId: string) {
     const friends = await this.friendsService.getFriends(userId);
 
     friends.forEach((f) => {
       const socketId = this.onlineUsers.get(f.friendId);
       if (socketId) {
-        this.server.to(socketId).emit("friend_offline", { userId });
+        this.server.to(socketId).emit('friend_offline', { userId });
       }
     });
   }
@@ -71,20 +71,20 @@ export class FriendsGateway {
   // ====================================================
   // SEND REQUEST EVENT (real-time)
   // ====================================================
-  async emitFriendRequest(toUserId: number, data: any) {
+  async emitFriendRequest(toUserId: string, data: any) {
     const socketId = this.onlineUsers.get(toUserId);
     if (!socketId) return;
 
-    this.server.to(socketId).emit("friend_request", data);
+    this.server.to(socketId).emit('friend_request', data);
   }
 
   // ====================================================
   // ACCEPT REQUEST EVENT
   // ====================================================
-  async emitFriendAccept(toUserId: number, data: any) {
+  async emitFriendAccept(toUserId: string, data: any) {
     const socketId = this.onlineUsers.get(toUserId);
     if (!socketId) return;
 
-    this.server.to(socketId).emit("friend_accepted", data);
+    this.server.to(socketId).emit('friend_accepted', data);
   }
 }

@@ -25,7 +25,7 @@ class ReturnUser {
   })
   @IsNotEmpty()
   @IsString()
-  id: number;
+  id: string;
 
   constructor(user: User) {
     this.id = user.id;

@@ -4,11 +4,17 @@ import {
   Body,
   Req,
   Param,
-  ParseIntPipe,
+  ParseUUIDPipe,
   Get,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 import { ChatService } from './chat.service';
@@ -52,7 +58,7 @@ export class ChatController {
     description: 'Chat ID',
   })
   @ApiResponse({ status: 200, description: 'Xabarlar ro‘yxati' })
-  getMessages(@Param('id', ParseIntPipe) chatId: number) {
+  getMessages(@Param('id', ParseUUIDPipe) chatId: string) {
     return this.service.getMessages(chatId);
   }
 
@@ -64,10 +70,7 @@ export class ChatController {
     description: 'Message ID',
   })
   @ApiResponse({ status: 200, description: 'Xabar o‘qilgan deb belgilandi' })
-  markAsRead(
-    @Param('id', ParseIntPipe) messageId: number,
-    @Req() req: any,
-  ) {
+  markAsRead(@Param('id', ParseUUIDPipe) messageId: string, @Req() req: any) {
     return this.service.markAsRead(messageId, req.user.id);
   }
 }

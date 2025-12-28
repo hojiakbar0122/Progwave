@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Post } from "./entities/post.entity";
-import { CreatePostDto } from "./dto/create-post.dto";
-import { UpdatePostDto } from "./dto/update-post.dto";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Post } from './entities/post.entity';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -12,7 +12,7 @@ export class PostsService {
     private readonly postRepo: Repository<Post>,
   ) {}
 
-  async create(userId: number, dto: CreatePostDto) {
+  async create(userId: string, dto: CreatePostDto) {
     const post = this.postRepo.create({
       userId,
       content: dto.content,
@@ -24,40 +24,40 @@ export class PostsService {
 
   async findAll() {
     return this.postRepo.find({
-      relations: ["user"],
-      order: { createdAt: "DESC" },
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const post = await this.postRepo.findOne({
       where: { id },
-      relations: ["user"],
+      relations: ['user'],
     });
 
-    if (!post) throw new NotFoundException("Post not found");
+    if (!post) throw new NotFoundException('Post not found');
     return post;
   }
 
-  async update(id: number, userId: number, dto: UpdatePostDto) {
+  async update(id: string, userId: string, dto: UpdatePostDto) {
     const post = await this.postRepo.findOneBy({ id });
-    if (!post) throw new NotFoundException("Post not found");
+    if (!post) throw new NotFoundException('Post not found');
 
     if (post.userId !== userId)
-      throw new NotFoundException("You cannot edit this post");
+      throw new NotFoundException('You cannot edit this post');
 
     Object.assign(post, dto);
     return await this.postRepo.save(post);
   }
 
-  async remove(id: number, userId: number) {
+  async remove(id: string, userId: string) {
     const post = await this.postRepo.findOneBy({ id });
-    if (!post) throw new NotFoundException("Post not found");
+    if (!post) throw new NotFoundException('Post not found');
 
     if (post.userId !== userId)
-      throw new NotFoundException("You cannot delete this post");
+      throw new NotFoundException('You cannot delete this post');
 
     await this.postRepo.remove(post);
-    return { message: "Post deleted" };
+    return { message: 'Post deleted' };
   }
 }

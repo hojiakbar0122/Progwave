@@ -7,7 +7,7 @@ import {
   Param,
   Body,
   Query,
-  ParseIntPipe,
+  ParseUUIDPipe,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,9 +21,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 
 import { NotificationService } from './notification.service';
-import {
-  CreateNotificationDto,
-} from './dto/create-notification.dto';
+import { CreateNotificationDto } from './dto/create-notification.dto';
 import { ACCESS_TOKEN_USER } from '../auth/passport-stratagies/access-token-user/access-token-user.strategy';
 import { GetNotificationsDto } from './dto/get-notifications.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
@@ -57,10 +55,7 @@ export class NotificationController {
     description: 'Notification ID',
   })
   @ApiResponse({ status: 200, description: 'Notification topildi' })
-  findOne(
-    @Req() req: any,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
+  findOne(@Req() req: any, @Param('id', ParseUUIDPipe) id: string) {
     return this.service.findOne(req.user.id, id);
   }
 
@@ -74,7 +69,7 @@ export class NotificationController {
   @ApiResponse({ status: 200, description: 'Notification yangilandi' })
   update(
     @Req() req: any,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateNotificationDto,
   ) {
     return this.service.update(req.user.id, id, dto);
@@ -88,10 +83,7 @@ export class NotificationController {
     description: 'Notification ID',
   })
   @ApiResponse({ status: 200, description: 'Notification o‘chirildi' })
-  remove(
-    @Req() req: any,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
+  remove(@Req() req: any, @Param('id', ParseUUIDPipe) id: string) {
     return this.service.remove(req.user.id, id);
   }
 }

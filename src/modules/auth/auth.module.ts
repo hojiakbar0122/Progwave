@@ -12,7 +12,9 @@ import { RefreshTokenUserStrategy } from './passport-stratagies/refresh-token-us
 
 import { AccessTokenUserGuard } from './passport-stratagies/access-token-user/access-token-user.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { GoogleStrategy } from './strategy/google.strategy';
 import { UserModule } from '../users/users.module';
+import { GithubStrategy } from './strategy/github.strategy';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { UserModule } from '../users/users.module';
     RefreshTokenUserStrategy,
     AccessTokenUserGuard,
     RolesGuard,
+    GoogleStrategy,
+    GithubStrategy,
   ],
   exports: [AuthService, AccessTokenUserGuard, RolesGuard],
 })

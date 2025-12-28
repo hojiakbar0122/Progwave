@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Position } from './position.entity';
+import { Position } from './entity/position.entity';
 import { PositionService } from './position.service';
 import { PositionController } from './position.controller';
 

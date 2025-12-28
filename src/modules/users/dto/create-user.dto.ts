@@ -1,15 +1,9 @@
 import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  IsArray,
-  IsDate,
   IsEmail,
   IsOptional,
   IsPhoneNumber,
   IsString,
   IsUUID,
-  Matches,
-  Validate,
   ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
@@ -82,8 +76,13 @@ class CreateUserDto {
 
   @ApiProperty({ description: `position id`, example: 'uuid', required: false })
   @IsOptional()
+  @IsUUID('4')
   @IsString()
   readonly position?: string;
+
+  @IsOptional()
+  @IsUUID('4')
+  readonly avatar?: string;
 }
 
 export default CreateUserDto;

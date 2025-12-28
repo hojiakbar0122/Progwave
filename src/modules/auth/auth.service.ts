@@ -1,7 +1,11 @@
 import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { BadRequestException } from '@nestjs/common/exceptions';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common/exceptions';
 import { ConfigService } from '@nestjs/config';
 
 import axios from 'axios';
@@ -10,7 +14,7 @@ import { UserService } from '../users/users.service';
 import { ensureEnv } from 'src/shared/helpers/ensureEnv';
 import { CreateUserDto } from '../users/dto';
 import { User } from '../users/entities/user.entity';
-import { where } from 'sequelize';
+import GoogleUser from './interfaces/google.interface';
 @Injectable()
 export class AuthService {
   private redis: Redis;
@@ -90,7 +94,7 @@ export class AuthService {
     return { message: 'Email tasdiqlandi' };
   }
 
-  async validateUserById(userId: number) {
+  async validateUserById(userId: string) {
     const user = await this.userService.getOne(userId).catch(() => {
       throw new BadRequestException('Valid token with non-existent user.');
     });
@@ -102,7 +106,7 @@ export class AuthService {
     return isSame;
   }
 
-  getJWT(type: 'access' | 'refresh', sub: number) {
+  getJWT(type: 'access' | 'refresh', sub: string) {
     const payload = { sub };
 
     if (type === 'access') {
@@ -116,12 +120,162 @@ export class AuthService {
     });
   }
 
-  async isValidUser(id: number): Promise<boolean> {
+  async isValidUser(id: string): Promise<boolean> {
     const user = await this.userService.getOne(id);
     return !!user?.isActive;
   }
+
   async register(dto: CreateUserDto): Promise<User> {
     const user = await this.userService.register(dto);
     return user;
+  }
+
+  async fullUserData(id: string): Promise<User | undefined> {
+    let fullUser = await this.userService.findOne(id);
+
+    if (fullUser) {
+      return fullUser;
+    } else {
+      return undefined;
+    }
+  }
+
+  async googleLogin(googleUser: GoogleUser) {
+    // Email bor-yo'qligini tekshirish
+    let user = await this.userService.getByLogin(googleUser.email);
+
+    if (!user) {
+      // Yangi user yaratish
+      const randomPass = await bcrypt.hash(Math.random().toString(36), 10);
+      const dto: CreateUserDto = {
+        email: googleUser.email,
+        firstName: googleUser.firstName,
+        lastName: googleUser.lastName,
+        nickname: `google_${googleUser.googleId}`,
+        password: randomPass,
+        address: '',
+      };
+      user = await this.userService.register(dto);
+    }
+
+    // Token yaratish
+    return {
+      user,
+      accessToken: this.getJWT('access', user.id),
+      refreshToken: this.getJWT('refresh', user.id),
+    };
+  }
+
+  async test() {
+    return 'Auth service is working!';
+  }
+
+  async sendCodeForChangePassword(email: string) {
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) {
+      throw new NotFoundException('Foydalanuvchi topilmadi');
+    }
+
+    const existingCode = await this.redis.get(`change_password:${email}`);
+    if (existingCode) {
+      throw new BadRequestException(
+        'Kod allaqachon yuborilgan. Iltimos, 3 daqiqa kuting.',
+      );
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await this.redis.set(`change_password:${email}`, code, 'EX', 180); // 3 daqiqa
+
+    const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>Parolni o'zgartirish tasdiqlash</h2>
+      <p>Hurmatli foydalanuvchi,</p>
+      <p>Parolingizni o'zgartirish uchun tasdiqlash kodi:</p>
+      <div style="background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px;">
+        ${code}
+      </div>
+      <p style="color: #666; font-size: 14px;">
+        Bu kod 3 daqiqa davomida amal qiladi.
+      </p>
+      <p style="color: #999; font-size: 12px;">
+        Agar siz bu so'rovni yubormasangiz, bu xabarni e'tiborsiz qoldiring.
+      </p>
+    </div>
+  `;
+
+    const apiKey = this.configService.get<string>('RESEND_API_KEY');
+
+    await axios.post(
+      'https://api.resend.com/emails',
+      {
+        from: 'UzChamp <noreply@uzchamp.uz>',
+        to: email,
+        subject: "Parolni o'zgartirish kodi",
+        html,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    return {
+      message: 'Tasdiqlash kodi emailingizga yuborildi',
+    };
+  }
+
+  async verifyChangePasswordCode(email: string, code: string) {
+    const storedCode = await this.redis.get(`change_password:${email}`);
+
+    if (!storedCode || storedCode !== code) {
+      throw new BadRequestException("Kod noto'g'ri yoki muddati o'tgan");
+    }
+
+    // ✅ To'g'ri kalit bilan o'chirish
+    await this.redis.del(`change_password:${email}`);
+    return { message: 'Kod tasdiqlandi' };
+  }
+
+  async changePassword(
+    email: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) {
+      throw new NotFoundException('Foydalanuvchi topilmadi');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.userService.update(user.id, { password: hashedPassword });
+
+    return { message: "Parol muvaffaqiyatli o'zgartirildi" };
+  }
+
+  async githubLogin(githubUser: any) {
+    // DB da user qidirish yoki yaratish
+    let user = await this.userService.findOneByEmail(githubUser.email);
+    if (!user) {
+      // Yangi user yaratish
+      const randomPass = await bcrypt.hash(Math.random().toString(36), 10);
+      const dto: CreateUserDto = {
+        email: githubUser.email,
+        firstName: githubUser.firstName,
+        lastName: githubUser.lastName,
+        nickname: `github_${githubUser.googleId}`,
+        password: randomPass,
+        address: '',
+      };
+      user = await this.userService.register(dto);
+    }
+
+    // Token yaratish
+    return {
+      user,
+      accessToken: this.getJWT('access', user.id),
+      refreshToken: this.getJWT('refresh', user.id),
+    };
   }
 }

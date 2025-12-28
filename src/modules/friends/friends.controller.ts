@@ -1,4 +1,3 @@
-
 import {
   Controller,
   Post,
@@ -6,7 +5,7 @@ import {
   Get,
   Req,
   UseGuards,
-  ParseIntPipe,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -39,7 +38,7 @@ export class FriendsController {
   @ApiResponse({ status: 201, description: 'Do‘stlik so‘rovi yuborildi' })
   sendRequest(
     @Req() req: any,
-    @Param('toUserId', ParseIntPipe) toUserId: number,
+    @Param('toUserId', ParseUUIDPipe) toUserId: string,
   ) {
     return this.friendsService.sendRequest(req.user.id, toUserId);
   }
@@ -55,7 +54,7 @@ export class FriendsController {
   @ApiResponse({ status: 200, description: 'So‘rov qabul qilindi' })
   accept(
     @Req() req: any,
-    @Param('requestId', ParseIntPipe) requestId: number,
+    @Param('requestId', ParseUUIDPipe) requestId: string,
   ) {
     return this.friendsService.acceptRequest(requestId, req.user.id);
   }
@@ -71,7 +70,7 @@ export class FriendsController {
   @ApiResponse({ status: 200, description: 'So‘rov rad etildi' })
   reject(
     @Req() req: any,
-    @Param('requestId', ParseIntPipe) requestId: number,
+    @Param('requestId', ParseUUIDPipe) requestId: string,
   ) {
     return this.friendsService.rejectRequest(requestId, req.user.id);
   }
@@ -87,7 +86,7 @@ export class FriendsController {
   @ApiResponse({ status: 200, description: 'So‘rov bekor qilindi' })
   cancel(
     @Req() req: any,
-    @Param('requestId', ParseIntPipe) requestId: number,
+    @Param('requestId', ParseUUIDPipe) requestId: string,
   ) {
     return this.friendsService.cancelRequest(requestId, req.user.id);
   }

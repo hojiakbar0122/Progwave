@@ -8,7 +8,7 @@ import {
   Param,
   Req,
   UseGuards,
-  ParseIntPipe,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -49,20 +49,20 @@ export class PostsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Bitta postni olish' })
-  @ApiParam({ name: 'id', type: Number, description: 'Post ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Post ID' })
   @ApiResponse({ status: 200, description: 'Post topildi' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.postsService.findOne(id);
   }
 
   @UseGuards(AuthGuard(ACCESS_TOKEN_USER))
   @Patch(':id')
   @ApiOperation({ summary: 'Postni yangilash (faqat o‘z posti)' })
-  @ApiParam({ name: 'id', type: Number, description: 'Post ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Post ID' })
   @ApiResponse({ status: 200, description: 'Post yangilandi' })
   update(
     @Req() req: any,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdatePostDto,
   ) {
     return this.postsService.update(id, req.user.id, dto);
@@ -71,9 +71,9 @@ export class PostsController {
   @UseGuards(AuthGuard(ACCESS_TOKEN_USER))
   @Delete(':id')
   @ApiOperation({ summary: 'Postni o‘chirish (faqat o‘z posti)' })
-  @ApiParam({ name: 'id', type: Number, description: 'Post ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Post ID' })
   @ApiResponse({ status: 200, description: 'Post o‘chirildi' })
-  remove(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+  remove(@Req() req: any, @Param('id', ParseUUIDPipe) id: string) {
     return this.postsService.remove(id, req.user.id);
   }
 }

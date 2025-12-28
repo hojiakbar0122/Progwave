@@ -15,27 +15,42 @@ export enum Gender {
 }
 
 export class CreateProfileDto {
-  @ApiPropertyOptional({ description: 'Foydalanuvchi to‘liq ismi', example: 'Hojiakbar Ibragimov' })
+  @ApiPropertyOptional({
+    description: 'Foydalanuvchi to‘liq ismi',
+    example: 'Hojiakbar Ibragimov',
+  })
   @IsOptional()
   @IsString()
   fullName?: string;
 
-  @ApiPropertyOptional({ description: 'Bio / qisqacha tavsif', example: 'NestJS developer' })
+  @ApiPropertyOptional({
+    description: 'Bio / qisqacha tavsif',
+    example: 'NestJS developer',
+  })
   @IsOptional()
   @IsString()
   bio?: string;
 
-  @ApiPropertyOptional({ description: 'Veb-sayt URL', example: 'https://example.com' })
+  @ApiPropertyOptional({
+    description: 'Veb-sayt URL',
+    example: 'https://example.com',
+  })
   @IsOptional()
   @IsUrl()
   website?: string;
 
-  @ApiPropertyOptional({ description: 'Avatar rasmi URL', example: 'https://example.com/avatar.jpg' })
+  @ApiPropertyOptional({
+    description: 'Avatar rasmi URL',
+    example: 'https://example.com/avatar.jpg',
+  })
   @IsOptional()
   @IsUrl()
   avatarUrl?: string;
 
-  @ApiPropertyOptional({ description: 'Cover rasmi URL', example: 'https://example.com/cover.jpg' })
+  @ApiPropertyOptional({
+    description: 'Cover rasmi URL',
+    example: 'https://example.com/cover.jpg',
+  })
   @IsOptional()
   @IsUrl()
   coverImageUrl?: string;
@@ -50,7 +65,10 @@ export class CreateProfileDto {
   @IsDateString()
   birthday?: string;
 
-  @ApiPropertyOptional({ description: 'Ko‘nikmalar ro‘yxati', example: ['NestJS', 'TypeScript'] })
+  @ApiPropertyOptional({
+    description: 'Ko‘nikmalar ro‘yxati',
+    example: ['NestJS', 'TypeScript'],
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

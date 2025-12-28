@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Position } from '../position/position.entity';
+import { Position } from '../position/entity/position.entity';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { compare, hash } from 'bcrypt';
 import { User } from './entities/user.entity';
@@ -62,11 +62,12 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  async getOne(id: number, from?: Date, to?: Date, collection?: String) {
+  async getOne(id: string): Promise<User> {
     const data = await this.userRepository.findOne({
       where: { id },
       relations: {
         position: true,
+        avatar: true,
       },
     });
 
@@ -82,7 +83,7 @@ export class UserService {
       relations: ['position'],
     });
   }
-  async findOne(id: number): Promise<User> {
+  async findOne(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['position'],
@@ -95,7 +96,7 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, dto: UpdateUserDto): Promise<User> {
+  async update(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['position'],
@@ -128,7 +129,7 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
     await this.userRepository.remove(user);
   }
@@ -183,5 +184,9 @@ export class UserService {
     });
 
     return await this.userRepository.save(user);
+  }
+
+  async findOneByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ email });
   }
 }

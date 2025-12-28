@@ -1,11 +1,18 @@
-import { Entity, PrimaryGeneratedColumn, ManyToMany, OneToMany, CreateDateColumn, JoinTable } from "typeorm";
-import { User } from "../../users/entities/user.entity";
-import { Message } from "../../message/entities/message.entity";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToMany,
+  OneToMany,
+  CreateDateColumn,
+  JoinTable,
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+import { Message } from '../../message/entities/message.entity';
 
-@Entity("chats")
+@Entity('chats')
 export class Chat {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToMany(() => User)
   @JoinTable()

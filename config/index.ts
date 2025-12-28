@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv';
 import { IConfig } from './config.interface';
+import MediaBucket from 'src/shared/enum/media.enum';
 
 dotenv.config();
 
@@ -10,7 +11,7 @@ function ensureEnv(key: string): string {
   }
   return value;
 }
-
+// Configuration object
 export default (): IConfig => ({
   port: parseInt(process.env.PORT || '3000', 10),
   RESEND_API_KEY: process.env.RESEND_API_KEY || '',
@@ -39,6 +40,21 @@ export default (): IConfig => ({
     accessTokenExpiration: ensureEnv('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
     refreshTokenSecret: ensureEnv('JWT_REFRESH_TOKEN_SECRET'),
     refreshTokenExpiration: ensureEnv('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
+  },
+
+  minIO: {
+    ENDPOINT: ensureEnv('MINIO_ENDPOINT'),
+    PORT: parseInt(ensureEnv('MINIO_PORT'), 10),
+    ACCESSKEY: ensureEnv('MINIO_ACCESSKEY'),
+    SECRETKEY: ensureEnv('MINIO_SECRETKEY'),
+    BUCKET: MediaBucket.AVATAR,
+    useSSL: ensureEnv('MINIO_USE_SSL') === 'true',
+  },
+
+  googleOAuth: {
+    clientID: ensureEnv('GOOGLE_CLIENT_ID'),
+    clientSecret: ensureEnv('GOOGLE_CLIENT_SECRET'),
+    callbackURL: ensureEnv('GOOGLE_CALLBACK_URL'),
   },
 
   newPasswordBytes: 4,
