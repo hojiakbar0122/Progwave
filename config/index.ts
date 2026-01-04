@@ -28,6 +28,8 @@ export default (): IConfig => ({
     autoLoadEntities: true,
     entities: ['./dist/**/*.entity.js'],
     synchronize: true,
+    // Run migrations automatically before schema sync to clean problematic rows
+    migrationsRun: true,
     migrations: [`${__dirname}/../db/migrations/*{.ts,.js}`],
     migrationsTableName: 'migration',
     extra: {
@@ -35,7 +37,6 @@ export default (): IConfig => ({
     },
   },
 
-  
   jwt: {
     accessTokenSecret: ensureEnv('JWT_ACCESS_TOKEN_SECRET'),
     accessTokenExpiration: ensureEnv('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
