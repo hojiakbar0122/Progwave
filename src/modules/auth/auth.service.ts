@@ -67,7 +67,7 @@ export class AuthService {
     await axios.post(
       'https://api.resend.com/emails',
       {
-        from: 'UzChamp <noreply@uzchamp.uz>',
+        from: 'onboarding@resend.dev',
         to: email,
         subject: 'Your Verification Code',
         html,
@@ -96,7 +96,7 @@ export class AuthService {
 
   async validateUserById(userId: string) {
     const user = await this.userService.getOne(userId).catch(() => {
-      throw new BadRequestException('Valid token with non-existent user.');
+      throw new BadRequestException('Valid token with non-existent user. ');
     });
     return user;
   }
