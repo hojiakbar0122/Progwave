@@ -35,6 +35,7 @@ export default (): IConfig => ({
     },
   },
 
+  
   jwt: {
     accessTokenSecret: ensureEnv('JWT_ACCESS_TOKEN_SECRET'),
     accessTokenExpiration: ensureEnv('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
