@@ -11,6 +11,6 @@ import { FriendsGateway } from './friends.gateway';
   imports: [TypeOrmModule.forFeature([FriendRequest, Friend, User])],
   providers: [FriendsService, FriendsGateway],
   controllers: [FriendsController],
-  exports: [FriendsService, forwardRef(() => FriendsGateway)]
+  exports: [FriendsService, forwardRef(() => FriendsGateway)],
 })
 export class FriendsModule {}

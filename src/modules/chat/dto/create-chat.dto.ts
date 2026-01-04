@@ -17,15 +17,16 @@ export class CreateChatDto {
   @IsArray()
   @ArrayNotEmpty()
   @IsInt({ each: true })
-  participantIds: number[];
+  participantIds: string[];
 
   @ApiPropertyOptional({
-    description: 'Agar chat yaratilganda birinchi xabar bo‘lsa, yuboruvchi IDsi',
+    description:
+      'Agar chat yaratilganda birinchi xabar bo‘lsa, yuboruvchi IDsi',
     example: 1,
   })
   @IsOptional()
   @IsInt()
-  initialMessageSenderId?: number;
+  initialMessageSenderId?: string;
 
   @ApiPropertyOptional({
     description: 'Chat yaratilganda yuboriladigan dastlabki xabar matni',

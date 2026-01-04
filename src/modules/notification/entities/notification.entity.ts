@@ -6,25 +6,25 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
-} from "typeorm";
-import { User } from "../../users/entities/user.entity";
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
-@Entity("notifications")
+@Entity('notifications')
 export class Notification {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @ManyToOne(() => User, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "userId" })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @Column()
-  userId: number;
+  userId: string;
 
   @Column({ length: 50 })
   type: string;
 
-  @Column({ type: "json" })
+  @Column({ type: 'json' })
   payload: any;
 
   @Column({ default: false })

@@ -33,7 +33,7 @@ export class FriendsService {
   // ============================================================
   // SEND FRIEND REQUEST
   // ============================================================
-  async sendRequest(fromUserId: number, toUserId: number) {
+  async sendRequest(fromUserId: string, toUserId: string) {
     if (fromUserId === toUserId)
       throw new BadRequestException('You cannot add yourself.');
 
@@ -83,7 +83,7 @@ export class FriendsService {
   // ============================================================
   // ACCEPT REQUEST
   // ============================================================
-  async acceptRequest(requestId: number, userId: number) {
+  async acceptRequest(requestId: string, userId: string) {
     const request = await this.friendRequestRepo.findOne({
       where: { id: requestId },
     });
@@ -132,7 +132,7 @@ export class FriendsService {
   // ============================================================
   // REJECT REQUEST
   // ============================================================
-  async rejectRequest(requestId: number, userId: number) {
+  async rejectRequest(requestId: string, userId: string) {
     const request = await this.friendRequestRepo.findOne({
       where: { id: requestId },
     });
@@ -152,7 +152,7 @@ export class FriendsService {
   // ============================================================
   // CANCEL REQUEST (sender cancels)
   // ============================================================
-  async cancelRequest(requestId: number, userId: number) {
+  async cancelRequest(requestId: string, userId: string) {
     const request = await this.friendRequestRepo.findOne({
       where: { id: requestId },
     });
@@ -172,7 +172,7 @@ export class FriendsService {
   // ============================================================
   // FRIEND LIST
   // ============================================================
-  async getFriends(userId: number) {
+  async getFriends(userId: string) {
     return this.friendRepo.find({
       where: { userId },
       relations: ['friend'],
@@ -182,7 +182,7 @@ export class FriendsService {
   // ============================================================
   // PENDING REQUESTS (received)
   // ============================================================
-  async getPendingRequests(userId: number) {
+  async getPendingRequests(userId: string) {
     return this.friendRequestRepo.find({
       where: { toUserId: userId, status: 'pending' },
       relations: ['fromUser'],

@@ -7,7 +7,7 @@ import {
 } from 'nestjs-typeorm-paginate';
 
 import { CreatePositionDto, UpdatePositionDto } from './dto';
-import { Position } from './position.entity';
+import { Position } from './entity/position.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()

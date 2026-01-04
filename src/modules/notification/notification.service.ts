@@ -7,9 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Notification } from './entities/notification.entity';
-import {
-  CreateNotificationDto,
-} from './dto/create-notification.dto';
+import { CreateNotificationDto } from './dto/create-notification.dto';
 import { GetNotificationsDto } from './dto/get-notifications.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 
@@ -22,7 +20,7 @@ export class NotificationService {
 
   // 🔔 Notification yaratish
   async create(
-    userId: number,
+    userId: string,
     dto: CreateNotificationDto,
   ): Promise<Notification> {
     const notification = this.notificationRepo.create({
@@ -35,7 +33,7 @@ export class NotificationService {
 
   // 📥 Foydalanuvchi notificationlari
   async findAll(
-    userId: number,
+    userId: string,
     query: GetNotificationsDto,
   ): Promise<Notification[]> {
     const where: any = { userId };
@@ -55,10 +53,7 @@ export class NotificationService {
   }
 
   // 🔍 Bitta notification
-  async findOne(
-    userId: number,
-    id: number,
-  ): Promise<Notification> {
+  async findOne(userId: string, id: string): Promise<Notification> {
     const notification = await this.notificationRepo.findOne({
       where: { id, userId },
     });
@@ -72,8 +67,8 @@ export class NotificationService {
 
   // ✏️ Yangilash (read qilish)
   async update(
-    userId: number,
-    id: number,
+    userId: string,
+    id: string,
     dto: UpdateNotificationDto,
   ): Promise<Notification> {
     const notification = await this.findOne(userId, id);
@@ -83,10 +78,7 @@ export class NotificationService {
   }
 
   // 🗑 O‘chirish
-  async remove(
-    userId: number,
-    id: number,
-  ): Promise<void> {
+  async remove(userId: string, id: string): Promise<void> {
     const notification = await this.findOne(userId, id);
     await this.notificationRepo.remove(notification);
   }

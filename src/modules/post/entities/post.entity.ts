@@ -6,25 +6,25 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
-} from "typeorm";
-import { User } from "../../users/entities/user.entity";
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
-@Entity("posts")
+@Entity('posts')
 export class Post {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ type: "text" })
+  @Column({ type: 'text' })
   content: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: 'text', nullable: true })
   imageUrl: string | null;
 
   @Column()
-  userId: number;
+  userId: string;
 
-  @ManyToOne(() => User, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "userId" })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @CreateDateColumn()

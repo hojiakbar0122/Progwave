@@ -1,10 +1,10 @@
-import { IsInt, IsNotEmpty, IsEnum } from "class-validator";
+import { IsInt, IsNotEmpty, IsEnum } from 'class-validator';
 
 export class RespondFriendRequestDto {
   @IsInt()
   @IsNotEmpty()
-  requestId: number;
+  requestId: string;
 
-  @IsEnum(["accept", "reject"])
-  action: "accept" | "reject";
+  @IsEnum(['accept', 'reject'])
+  action: 'accept' | 'reject';
 }

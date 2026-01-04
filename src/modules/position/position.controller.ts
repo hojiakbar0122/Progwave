@@ -19,7 +19,7 @@ import {
 } from '@nestjs/swagger';
 
 import { CreatePositionDto, PositionQueryDto, UpdatePositionDto } from './dto';
-import { Position } from './position.entity';
+import { Position } from './entity/position.entity';
 import { PositionService } from './position.service';
 import { Public } from '../auth/decorators/public.decorator';
 import { Route } from 'src/shared/decorators/route.decorator';

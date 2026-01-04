@@ -7,6 +7,7 @@ import {
   Req,
   ParseIntPipe,
   UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -48,16 +49,16 @@ export class StoryController {
   @UseGuards(AuthGuard(ACCESS_TOKEN_USER))
   @Post('view/:storyId')
   @ApiOperation({ summary: 'Story ko‘rildi deb belgilash' })
-  @ApiParam({ name: 'storyId', type: Number, description: 'Story ID' })
-  viewStory(@Req() req: any, @Param('storyId', ParseIntPipe) storyId: number) {
+  @ApiParam({ name: 'storyId', type: String, description: 'Story ID' })
+  viewStory(@Req() req: any, @Param('storyId', ParseUUIDPipe) storyId: string) {
     return this.service.viewStory(storyId, req.user.id);
   }
 
   @UseGuards(AuthGuard(ACCESS_TOKEN_USER))
   @Get('views/:storyId')
   @ApiOperation({ summary: 'Story kimlar tomonidan ko‘rilganini olish' })
-  @ApiParam({ name: 'storyId', type: Number, description: 'Story ID' })
-  getViews(@Param('storyId', ParseIntPipe) storyId: number) {
+  @ApiParam({ name: 'storyId', type: String, description: 'Story ID' })
+  getViews(@Param('storyId', ParseUUIDPipe) storyId: string) {
     return this.service.getViews(storyId);
   }
 }

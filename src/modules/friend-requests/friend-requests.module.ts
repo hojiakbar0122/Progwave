@@ -6,7 +6,7 @@ import { FriendRequest } from './entities/friend-request.entity';
 import { User } from '../users/entities/user.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([FriendRequest, User])],
+  imports: [TypeOrmModule.forFeature([FriendRequest, User])],
   controllers: [FriendRequestController],
   providers: [FriendRequestService],
 })

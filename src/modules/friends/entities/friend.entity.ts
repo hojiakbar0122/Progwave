@@ -5,29 +5,29 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-} from "typeorm";
-import { User } from "../../users/entities/user.entity";
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
-@Entity("friends")
+@Entity('friends')
 export class Friend {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => User, (user) => user.friends, {
-    onDelete: "CASCADE",
+    onDelete: 'CASCADE',
   })
   user: User;
 
   @Column()
-  userId: number;
+  userId: string;
 
   @ManyToOne(() => User, (user) => user.friendOf, {
-    onDelete: "CASCADE",
+    onDelete: 'CASCADE',
   })
   friend: User;
 
   @Column()
-  friendId: number;
+  friendId: string;
 
   @CreateDateColumn()
   createdAt: Date;

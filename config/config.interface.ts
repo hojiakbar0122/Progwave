@@ -1,3 +1,5 @@
+import MediaBucket from 'src/shared/enum/media.enum';
+
 interface IJWT {
   accessTokenSecret: string;
   accessTokenExpiration: string;
@@ -31,6 +33,15 @@ interface IDatabase {
   };
 }
 
+interface minIO {
+  ENDPOINT: string;
+  PORT: number;
+  ACCESSKEY: string;
+  SECRETKEY: string;
+  BUCKET: MediaBucket;
+  useSSL: boolean;
+}
+
 export interface IConfig {
   port: number;
   database: IDatabase;
@@ -38,4 +49,12 @@ export interface IConfig {
   newPasswordBytes: number;
   codeBytes: number;
   RESEND_API_KEY: string;
+  minIO: minIO;
+  googleOAuth: IGoogleOAuth;
+}
+
+interface IGoogleOAuth {
+  clientID: string;
+  clientSecret: string;
+  callbackURL: string;
 }

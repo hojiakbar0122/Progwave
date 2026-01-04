@@ -13,6 +13,8 @@ import { FriendRequestsModule } from './modules/friend-requests/friend-requests.
 import { StoryModule } from './modules/story/story.module';
 import { MessageModule } from './modules/message/message.module';
 import configuration from '../config';
+import { MediaModule } from './modules/media/media.module';
+import { MinioClientModule } from './modules/minio-client/minio-client.module';
 
 @Module({
   imports: [
@@ -27,7 +29,7 @@ import configuration from '../config';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: 'postgres',  // yoki config.get<string>('DB_TYPE') agar env’dan o‘qimoqchi bo‘lsangiz
+        type: 'postgres', // yoki config.get<string>('DB_TYPE') agar env’dan o‘qimoqchi bo‘lsangiz
         host: config.get<string>('DB_HOST'),
         port: Number(config.get<number>('DB_PORT')),
         username: config.get<string>('DB_USERNAME'),
@@ -50,6 +52,8 @@ import configuration from '../config';
     FriendRequestsModule,
     StoryModule,
     MessageModule,
+    MinioClientModule,
+    MediaModule,
   ],
 })
 export class AppModule {}

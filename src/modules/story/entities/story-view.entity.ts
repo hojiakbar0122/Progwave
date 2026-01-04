@@ -5,27 +5,27 @@ import {
   ManyToOne,
   CreateDateColumn,
   JoinColumn,
-} from "typeorm";
-import { User } from "../../users/entities/user.entity";
-import { Story } from "./story.entity";
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+import { Story } from './story.entity';
 
-@Entity("story_views")
+@Entity('story_views')
 export class StoryView {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  storyId: number;
+  storyId: string;
 
-  @ManyToOne(() => Story, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "storyId" })
+  @ManyToOne(() => Story, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'storyId' })
   story: Story;
 
   @Column()
-  userId: number;
+  userId: string;
 
-  @ManyToOne(() => User, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "userId" })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @CreateDateColumn()

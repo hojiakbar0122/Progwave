@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { Repository } from "typeorm";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Chat } from "./entities/chat.entity";
-import { Message } from "../message/entities/message.entity";
-import { User } from "../users/entities/user.entity";
-import { CreateChatDto } from "./dto/create-chat.dto";
-import { CreateMessageDto } from "../message/dto/create-message.dto";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Chat } from './entities/chat.entity';
+import { Message } from '../message/entities/message.entity';
+import { User } from '../users/entities/user.entity';
+import { CreateChatDto } from './dto/create-chat.dto';
+import { CreateMessageDto } from '../message/dto/create-message.dto';
 
 @Injectable()
 export class ChatService {
@@ -39,9 +39,8 @@ export class ChatService {
 
   // Chatga message qo‘shish
   async addMessage(dto: CreateMessageDto) {
-    
     const chat = await this.chatRepo.findOne({ where: { id: dto.chatId } });
-    if (!chat) throw new NotFoundException("Chat not found");
+    if (!chat) throw new NotFoundException('Chat not found');
 
     const message = this.messageRepo.create({
       chat,
@@ -53,20 +52,22 @@ export class ChatService {
   }
 
   // Chatdagi barcha xabarlarni olish
-  async getMessages(chatId: number) {
+  async getMessages(chatId: string) {
     return this.messageRepo.find({
       where: { chat: { id: chatId } },
-      order: { createdAt: "ASC" },
+      order: { createdAt: 'ASC' },
     });
   }
 
   // Xabarni o‘qilgan sifatida belgilash
-  async markAsRead(messageId: number, userId: number) {
-    const message = await this.messageRepo.findOne({ where: { id: messageId } });
-    if (!message) throw new NotFoundException("Message not found");
+  async markAsRead(messageId: string, userId: string) {
+    const message = await this.messageRepo.findOne({
+      where: { id: messageId },
+    });
+    if (!message) throw new NotFoundException('Message not found');
 
     if (message.senderId === userId)
-      throw new Error("You cannot mark your own sent message as read");
+      throw new Error('You cannot mark your own sent message as read');
 
     message.read = true;
     message.readAt = new Date();

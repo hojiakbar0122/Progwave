@@ -18,11 +18,13 @@ export class ProfileService {
   ) {}
 
   // 🔹 Profile yaratish (faqat token userId bilan)
-  async create(userId: number, dto: CreateProfileDto) {
+  async create(userId: string, dto: CreateProfileDto) {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    const existing = await this.repo.findOne({ where: { user: { id: userId } } });
+    const existing = await this.repo.findOne({
+      where: { user: { id: userId } },
+    });
     if (existing) return existing;
 
     const profile = this.repo.create({
@@ -41,8 +43,10 @@ export class ProfileService {
   }
 
   // 🔹 O‘z profilini olish
-  async findOne(userId: number) {
-    const profile = await this.repo.findOne({ where: { user: { id: userId } } });
+  async findOne(userId: string) {
+    const profile = await this.repo.findOne({
+      where: { user: { id: userId } },
+    });
     if (!profile) throw new NotFoundException('Profile not found');
     return profile;
   }
@@ -53,8 +57,10 @@ export class ProfileService {
   }
 
   // 🔹 O‘z profilini yangilash
-  async update(userId: number, dto: UpdateProfileDto) {
-    const profile = await this.repo.findOne({ where: { user: { id: userId } } });
+  async update(userId: string, dto: UpdateProfileDto) {
+    const profile = await this.repo.findOne({
+      where: { user: { id: userId } },
+    });
     if (!profile) throw new NotFoundException('Profile not found');
 
     Object.assign(profile, dto);
@@ -62,8 +68,10 @@ export class ProfileService {
   }
 
   // 🔹 O‘z profilini o‘chirish
-  async remove(userId: number) {
-    const profile = await this.repo.findOne({ where: { user: { id: userId } } });
+  async remove(userId: string) {
+    const profile = await this.repo.findOne({
+      where: { user: { id: userId } },
+    });
     if (!profile) throw new NotFoundException('Profile not found');
 
     await this.repo.remove(profile);

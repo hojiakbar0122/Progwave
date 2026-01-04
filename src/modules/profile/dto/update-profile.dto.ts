@@ -1,9 +1,4 @@
-import {
-  IsOptional,
-  IsString,
-  IsDateString,
-  IsIn,
-} from "class-validator";
+import { IsOptional, IsString, IsDateString, IsIn } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -31,6 +26,6 @@ export class UpdateProfileDto {
   birthday?: Date;
 
   @IsOptional()
-  @IsIn(["male", "female", "other"])
+  @IsIn(['male', 'female', 'other'])
   gender?: string;
 }

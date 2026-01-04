@@ -1,9 +1,9 @@
-import { IsNumber } from "class-validator";
+import { IsNumber } from 'class-validator';
 
 export class CreateFriendRequestDto {
   @IsNumber()
-  fromUserId: number;
+  fromUserId: string;
 
   @IsNumber()
-  toUserId: number;
+  toUserId: string;
 }
