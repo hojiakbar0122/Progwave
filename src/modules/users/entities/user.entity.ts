@@ -15,6 +15,7 @@ import { FriendRequest } from 'src/modules/friend-requests/entities/friend-reque
 import { Friend } from 'src/modules/friends/entities/friend.entity';
 import { Profile } from 'src/modules/profile/entities/profile.entity';
 import { Media } from 'src/modules/media/entity/media.entity';
+import { Chat } from 'src/modules/chat/entities/chat.entity';
 
 @Entity('users')
 export class User {
@@ -81,6 +82,9 @@ export class User {
 
   @OneToOne(() => Profile, (profile) => profile.user)
   profile: Profile;
+
+  @ManyToMany(() => Chat, (chat) => chat.participants)
+  chats: Chat[];
 
   @ManyToOne(() => Media, (media) => media.users, { onDelete: 'SET NULL' })
   avatar: Media;
