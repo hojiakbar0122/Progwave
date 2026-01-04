@@ -17,7 +17,7 @@ export class Message {
   @JoinColumn()
   chat: Chat;
 
-  @Column()
+  @Column({ nullable: true })
   senderId: string;
 
   @Column({ type: 'text' })
