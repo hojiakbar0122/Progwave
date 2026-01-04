@@ -62,6 +62,8 @@ export class AuthService {
         <p>Your code is: <strong>${code}</strong></p>
       </div>
     `;
+    console.log('ENV RESEND:', process.env.RESEND_API_KEY);
+    console.log('CFG RESEND:', this.configService.get('RESEND_API_KEY'));
 
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     await axios.post(
@@ -79,6 +81,9 @@ export class AuthService {
         },
       },
     );
+
+    console.log('ENV RESEND:', process.env.RESEND_API_KEY);
+    console.log('CFG RESEND:', this.configService.get('RESEND_API_KEY'));
 
     return { message: 'Kod yuborildi', email };
   }
