@@ -14,9 +14,9 @@ export class Chat {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToMany(() => User)
-  @JoinTable()
-  participants: User[];
+    @ManyToMany(() => User, { nullable: false })
+    @JoinTable()
+    participants: User[];
 
   @OneToMany(() => Message, (msg) => msg.chat)
   messages: Message[];
