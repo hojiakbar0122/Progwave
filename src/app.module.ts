@@ -36,7 +36,7 @@ import { MinioClientModule } from './modules/minio-client/minio-client.module';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: false,
         logging: false,
       }),
     }),
