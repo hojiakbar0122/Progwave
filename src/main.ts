@@ -23,7 +23,7 @@ async function start() {
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin: true,
+    origin: "*",
     credentials: true,
   });
 
