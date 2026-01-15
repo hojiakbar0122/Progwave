@@ -1,5 +1,6 @@
 export enum MediaBucket {
   AVATAR = 'avatar',
-  STORY = 'story',
+  IMAGE = 'image',
+  VIDEO = 'video',
 }
 export default MediaBucket;
