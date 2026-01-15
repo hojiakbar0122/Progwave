@@ -15,6 +15,14 @@ export class CreateStoryDto {
   @IsNotEmpty()
   mediaUrl: string;
 
+  @ApiProperty({
+    description: 'Media ID',
+    example: 'uuid',
+  })
+  @IsString()
+  @IsNotEmpty()
+  mediaId: string;
+
   @ApiPropertyOptional({ description: 'Media turi', enum: MediaType })
   @IsOptional()
   @IsEnum(MediaType)

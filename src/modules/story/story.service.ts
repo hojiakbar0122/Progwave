@@ -5,6 +5,7 @@ import { Story } from './entities/story.entity';
 import { StoryView } from './entities/story-view.entity';
 import { CreateStoryDto } from './dto/create-story.dto';
 import { User } from '../users/entities/user.entity';
+import { Media } from '../media/entity/media.entity';
 
 @Injectable()
 export class StoryService {
@@ -17,21 +18,29 @@ export class StoryService {
 
     @InjectRepository(StoryView)
     private viewRepo: Repository<StoryView>,
+
+    @InjectRepository(Media)
+    private mediaRepo: Repository<Media>,
   ) {}
 
   async create(userId: string, dto: CreateStoryDto) {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
-    if (!user) throw new NotFoundException('User not found');
+  const user = await this.userRepo.findOne({ where: { id: userId } });
+  if (!user) throw new NotFoundException('User not found');
 
-    const story = this.storyRepo.create({
-      userId,
-      mediaUrl: dto.mediaUrl,
-      mediaType: dto.mediaType ?? 'image',
-      expiresAt: new Date(Date.now() + 86400000),
-    });
+  // Media faylni olish
+  const media = await this.mediaRepo.findOne({ where: { id: dto.mediaId } });
+  if (!media) throw new NotFoundException('Media not found');
 
-    return this.storyRepo.save(story);
-  }
+  const story = this.storyRepo.create({
+    userId,
+    mediaUrl: media.path,       // MinIO path
+    mediaType: dto.mediaType,  // fayl tipi
+    expiresAt: new Date(Date.now() + 86400000), // 1 kun
+  });
+
+  return this.storyRepo.save(story);
+}
+
 
   async getUserStories(userId: string) {
     return this.storyRepo.find({
