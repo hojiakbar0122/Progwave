@@ -32,7 +32,7 @@ export class FriendsController {
   @ApiOperation({ summary: 'Do‘stlik so‘rovi yuborish' })
   @ApiParam({
     name: 'toUserId',
-    type: Number,
+    type: String,
     description: 'So‘rov yuboriladigan foydalanuvchi IDsi',
   })
   @ApiResponse({ status: 201, description: 'Do‘stlik so‘rovi yuborildi' })
@@ -48,7 +48,7 @@ export class FriendsController {
   @ApiOperation({ summary: 'Do‘stlik so‘rovini qabul qilish' })
   @ApiParam({
     name: 'requestId',
-    type: Number,
+    type: String,
     description: 'Friend request ID',
   })
   @ApiResponse({ status: 200, description: 'So‘rov qabul qilindi' })
@@ -104,6 +104,7 @@ export class FriendsController {
   @ApiOperation({ summary: 'Kutilayotgan do‘stlik so‘rovlarini olish' })
   @ApiResponse({ status: 200, description: 'Pending so‘rovlar ro‘yxati' })
   getPending(@Req() req: any) {
+    
     return this.friendsService.getPendingRequests(req.user.id);
   }
 }

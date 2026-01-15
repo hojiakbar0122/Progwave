@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Chat } from './entities/chat.entity';
@@ -73,4 +73,33 @@ export class ChatService {
     message.readAt = new Date();
     return this.messageRepo.save(message);
   }
+
+  async getUserChats(userId: string) {
+    return this.chatRepo
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.participants', 'participant')
+      .leftJoinAndSelect('chat.messages', 'message')
+      .where('participant.id = :userId', { userId })
+      .orderBy('chat.createdAt', 'DESC')
+      .getMany();
+  }
+
+  async getChatById(chatId: string, userId: string) {
+    const chat = await this.chatRepo
+      .createQueryBuilder('chat')
+      .leftJoinAndSelect('chat.participants', 'participant')
+      .leftJoinAndSelect('chat.messages', 'message')
+      .where('chat.id = :chatId', { chatId })
+      .andWhere('participant.id = :userId', { userId })
+      .orderBy('message.createdAt', 'ASC')
+      .getOne();
+
+    if (!chat) {
+      throw new ForbiddenException('Siz bu chatga kira olmaysiz');
+    }
+
+    return chat;
+  }
+
+
 }

@@ -1,7 +1,7 @@
-import { IsInt, IsNotEmpty, IsEnum } from 'class-validator';
+import { IsInt, IsNotEmpty, IsEnum, IsString } from 'class-validator';
 
 export class RespondFriendRequestDto {
-  @IsInt()
+  @IsString()
   @IsNotEmpty()
   requestId: string;
 

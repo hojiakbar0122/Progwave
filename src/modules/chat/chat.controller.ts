@@ -50,6 +50,30 @@ export class ChatController {
     return this.service.addMessage(dto);
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Foydalanuvchining barcha chatlarini olish' })
+  @ApiResponse({ status: 200, description: 'Chatlar ro‘yxati' })
+  getMyChats(@Req() req: any) {
+    return this.service.getUserChats(req.user.id);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Bitta chat ma’lumotini olish' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Chat ID',
+  })
+  @ApiResponse({ status: 200, description: 'Chat ma’lumoti' })
+  getOneChat(
+    @Param('id', ParseUUIDPipe) chatId: string,
+    @Req() req: any,
+  ) {
+    return this.service.getChatById(chatId, req.user.id);
+  }
+
+
+
   @Get(':id/messages')
   @ApiOperation({ summary: 'Chat xabarlarini olish' })
   @ApiParam({

@@ -7,16 +7,17 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { UUID } from 'sequelize';
 
 export class CreateChatDto {
   @ApiProperty({
     description: 'Chat ishtirokchilari IDlari',
-    example: [1, 2, 3],
-    type: [Number],
+    example: [UUID()],
+    type: [String],
   })
   @IsArray()
   @ArrayNotEmpty()
-  @IsInt({ each: true })
+  @IsString({ each: true })
   participantIds: string[];
 
   @ApiPropertyOptional({
@@ -25,7 +26,7 @@ export class CreateChatDto {
     example: 1,
   })
   @IsOptional()
-  @IsInt()
+  @IsString()
   initialMessageSenderId?: string;
 
   @ApiPropertyOptional({
