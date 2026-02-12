@@ -72,8 +72,6 @@ export class ChatController {
     return this.service.getChatById(chatId, req.user.id);
   }
 
-
-
   @Get(':id/messages')
   @ApiOperation({ summary: 'Chat xabarlarini olish' })
   @ApiParam({
@@ -84,6 +82,21 @@ export class ChatController {
   @ApiResponse({ status: 200, description: 'Xabarlar ro‘yxati' })
   getMessages(@Param('id', ParseUUIDPipe) chatId: string) {
     return this.service.getMessages(chatId);
+  }
+
+  @Get(':id/members')
+  @ApiOperation({ summary: 'Chat ishtirokchilarini olish' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Chat ID (UUID)',
+    example: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
+  })
+  @ApiResponse({ status: 200, description: 'Chat members ro‘yxati' })
+  @ApiResponse({ status: 403, description: 'Siz bu chatga kira olmaysiz' })
+  @ApiResponse({ status: 404, description: 'Chat topilmadi' })
+  getMembers(@Param('id', ParseUUIDPipe) chatId: string, @Req() req: any) {
+    return this.service.getChatMembers(chatId, req.user.id);
   }
 
   @Post('messages/:id/read')

@@ -6,6 +6,7 @@ import { Message } from '../message/entities/message.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { CreateMessageDto } from '../message/dto/create-message.dto';
+import { In } from 'typeorm'
 
 @Injectable()
 export class ChatService {
@@ -20,7 +21,7 @@ export class ChatService {
 
   // Yangi chat yaratish
   async createChat(dto: CreateChatDto) {
-    const participants = await this.userRepo.findByIds(dto.participantIds);
+    const participants = await this.userRepo.find({where:{id:In(dto.participantIds)}});
 
     const chat = this.chatRepo.create({ participants });
     await this.chatRepo.save(chat);
@@ -101,5 +102,24 @@ export class ChatService {
     return chat;
   }
 
+  async getChatMembers(chatId: string, userId: string) {
+    const chat = await this.chatRepo
+      .createQueryBuilder('chat')
+      .leftJoin('chat.participants', 'participant')
+      .addSelect(['participant.id', 'participant.full_name', 'participant.avatar']) // o'zingdagi field nomlari
+      .where('chat.id = :chatId', { chatId })
+      .andWhere('participant.id = :userId', { userId })
+      .getOne();
 
+    if (!chat) throw new ForbiddenException('Siz bu chatga kira olmaysiz');
+
+    // participants listni alohida query bilan olib beramiz (toza select bilan)
+    const members = await this.userRepo
+      .createQueryBuilder('u')
+      .innerJoin('u.chats', 'c', 'c.id = :chatId', { chatId })
+      .select(['u.id', 'u.full_name', 'u.avatar'])
+      .getMany();
+
+    return { chatId, members, total: members.length };
+  }
 }

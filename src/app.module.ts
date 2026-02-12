@@ -15,6 +15,7 @@ import { MessageModule } from './modules/message/message.module';
 import configuration from '../config';
 import { MediaModule } from './modules/media/media.module';
 import { MinioClientModule } from './modules/minio-client/minio-client.module';
+import { CommentsModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { MinioClientModule } from './modules/minio-client/minio-client.module';
     MessageModule,
     MinioClientModule,
     MediaModule,
+    CommentsModule,
   ],
 })
 export class AppModule {}

@@ -56,6 +56,9 @@ export class User {
   @Column({ type: 'boolean', default: false })
   isVerify: boolean;
 
+  @Column({ type: 'uuid', nullable: true })
+  avatarId: string | null;
+
   public async hashPassword(password: string): Promise<void> {
     this.password = await bcrypt.hash(password, 10);
   }
@@ -87,5 +90,6 @@ export class User {
   chats: Chat[];
 
   @ManyToOne(() => Media, (media) => media.users, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'avatarId' })
   avatar: Media;
 }

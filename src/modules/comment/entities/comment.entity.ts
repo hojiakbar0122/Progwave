@@ -3,34 +3,39 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  JoinColumn,
-  OneToMany,
+  Index,
 } from 'typeorm';
+import { Post } from '../../post/entities/post.entity';
 import { User } from '../../users/entities/user.entity';
-import { Comment } from 'src/modules/comment/entities/comment.entity';
 
-@Entity('posts')
-export class Post {
+@Entity('comments')
+export class Comment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'text' })
-  content: string;
+  text: string;
 
-  @Column({ type: 'text', nullable: true })
-  imageUrl: string | null;
+  // FK: postId
+  @Index()
+  @Column({ type: 'uuid' })
+  postId: string;
 
-  @Column()
+  @ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'postId' })
+  post: Post;
+
+  // FK: userId (author)
+  @Index()
+  @Column({ type: 'uuid' })
   userId: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
-
-  @OneToMany(() => Comment, (comment) => comment.post)
-  comments: Comment[];
 
   @CreateDateColumn()
   createdAt: Date;
